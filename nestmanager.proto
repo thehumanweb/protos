@@ -1,0 +1,84 @@
+
+syntax = "proto3";
+
+package nestmanager;
+
+service NestManager {
+	// Use the one time token I got on command line together with NestManager channel 
+	rpc Authenticate(OneTimeAuthToken) returns (BoolResult) {}
+	
+	// Get channel where I can speak to digital self
+	rpc GetDigitalSelfChannel(EmptyMessage) returns (ChannelMessage) {}
+	
+	// Get the one time token to authenticate to my digital self with	
+	rpc GetDigitalSelfAuthToken(EmptyMessage) returns (OneTimeAuthToken) {}	
+
+	// Set up RPC server for parent to speak to
+	rpc SetUmbilicalCord(ChannelMessage) returns (BoolResult) {}
+
+	// Hint to IPFS subsystem about how we would like particular objects to be around
+	rpc IPFSHint(IPFSHintMessage) returns (BoolResult) {}
+
+	// Create new Tor hidden service
+	rpc CreateChannel(EmptyMessage) returns (CreateChannelResponse) {}	
+
+	// Get a potentially faster channel than through Tor if the portal turns out to be localhost, else return same channel
+	rpc GetChannel(ChannelMessage) returns (ChannelMessage) {}
+
+	rpc DestroyChannel(ChannelMessage) returns (ChannelMessage) {} 
+
+	// Kill me. Not returning unless it can't
+	rpc ShutMeDown(EmptyMessage) returns (BoolResult) {}
+	
+	// Create nest, get back umbilical cord when process started up
+	rpc CreateNest(CreateNestMessage) returns (ChannelMessage) {}
+	// Shut down nest that I created based on the channel name 
+	rpc ShutdownNest(ChannelMessage) returns (BoolResult) {}
+}
+
+message EmptyMessage
+{
+}
+
+message OneTimeAuthToken {
+        string token = 1;
+}
+
+message ChannelMessage
+{
+	string channel = 1;
+	string onetimeauthtoken = 2;	
+}
+
+message CreateNestMessage
+{
+	// the ipfs hash
+	string ipfshash = 1;
+	// the template in use ('go', 'qml', ...)
+	string template = 2;
+	// the digital self channel it should speak to
+	string digitalselfchannel = 3;
+	// the digital self token
+	string digitalselftoken = 4;
+}
+
+message CreateChannelResponse
+{
+	string channel = 1;
+	string bindip = 2;
+	int32 bindport = 3;
+}
+
+message IPFSHintMessage
+{
+	string ipfshash = 1;
+	enum Hint { 
+		DEFAULT = 0;
+		PIN = 1;
+	}
+	Hint hint = 2;
+}
+
+message BoolResult {
+	bool result = 1;
+}

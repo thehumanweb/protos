@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package digitalself;
+
+service DigitalSelf {
+	// Get one-time  auth token for somebody else to connect to 
+	// DigitalSelf with 
+	rpc GetOneTimeAuthToken(EmptyMessage) returns (OneTimeAuthToken) {}
+	// Authenticate yourself with a token you got from somebody else
+	rpc Authenticate(OneTimeAuthToken) returns (BoolResult) {}
+
+	rpc GetLocatedFile(Path) returns (LocatedFile) {}
+	// This could probably be oneway
+	rpc LocateFileAtPath(LocatedFile) returns (BoolResult) {}
+	// Monitor updates on path and recursively
+	rpc Changes(Path) returns (stream LocatedFile) {}
+}
+
+message EmptyMessage
+{
+}
+
+message LocatedFile
+{
+	Path path = 1;
+	oneof the_file {
+		EncryptedFile encfile = 2;
+		UnencryptedFile unencfile = 3;
+        }
+}
+
+message Path
+{
+	string path = 1;
+}
+
+message UnencryptedFile {
+	string ipfshash = 1;
+}
+
+message EncryptedFile {
+	string ipfshash = 1;
+	string cryptoalg = 2;
+	bytes passphrase = 3;
+}
+
+message OneTimeAuthToken { 
+	string token = 1;
+}
+
+message BoolResult {
+	bool result = 1;
+}
